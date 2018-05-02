@@ -13,12 +13,17 @@ from PIL import Image
 
 import cv2
 from pyardrone.video import VideoClient
+from pyardrone import ARDrone
+import time
 
 #cap = cv2.VideoCapture(0)
 
 cap = VideoClient('192.168.1.1', 5555)
 cap.connect()
 cap.video_ready.wait()
+
+drone = ARDrone()
+drone.navdata_ready.wait()
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
