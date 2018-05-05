@@ -1,3 +1,4 @@
+
 import numpy as np
 import os
 import six.moves.urllib as urllib
@@ -21,6 +22,7 @@ import time
 cap = VideoClient('192.168.1.1', 5555)
 cap.connect()
 cap.video_ready.wait()
+
 
 drone = ARDrone()
 drone.navdata_ready.wait()
@@ -129,7 +131,9 @@ flag = 0
 with detection_graph.as_default():
     with tf.Session(graph=detection_graph) as sess:
         while True:
+            #print("FPS: ",cap.frame)
             image_np = cap.frame
+            #ret, image_np = cap.read()
             # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
             image_np_expanded = np.expand_dims(image_np, axis=0)
             image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -157,37 +161,49 @@ with detection_graph.as_default():
 
             print(list)
             for name in list:
-                if name['name'] == 'tv' and flag == 0:
+                if name['name'] == 'bottle' and flag == 0:
                     flag = 1
-                    print("tv detected1")
-                    time.sleep(.1)
+                    print("bottle detected1")
+                    time.sleep(0.1)
                     while not drone.state.fly_mask:
                         drone.takeoff()
 
-                    time.sleep(.1)
+                    time.sleep(0.1)
                     print("tv detected")
                     #print(boxes[0])
                     #[ymin, xmin, ymax, xmax]
                         #drone.takeoff()
                     #time.sleep(20)
-                elif name['name'] == 'chair':
+                elif name['name'] == 'cell phone' or name['name'] == 'remote':
                     while drone.state.fly_mask:
                         drone.land()
-                        print("chair detected")
+                        print("phone detected")
                         flag = 0
-                #if name['name'] == 'person':
+                if name['name'] == 'person':
 
-                    #posY =( boxes[0][0][0]  +  boxes[0][0][2])/2
-                    #print(posY)
+                    posY =( boxes[0][0][0]  +  boxes[0][0][2])/2
+                    posX =( boxes[0][0][1]  +  boxes[0][0][3])/2
+                    print('Position y' , posY)
+                    print('Position x' , posX)
+
                     #print(boxes[0])
-                    #if posY <= 0.32:
-                        #drone.move(cw = 0.1)
-                    #elif posY <= 0.66 and posY >= 0.33:
-                        #drone.move(foward = 0.1)
-                    #elif posY >= 0.67:
-                        #drone.move(ccw = 0.1)
+                    if posX < 0.4:
+                        print("pos 0")
+                        drone.move(ccw = 0.5)
+                    elif posX <= 0.60 and posX >= 0.4:
+                        print("pos 1")
+                        drone.move(forward = 0.3)
+                        drone.move(forward = 0.3)
+                        drone.move(forward = 0.3)
+                        drone.move(forward = 0.3)
+                    elif posX > 0.60:
+                        print("pos 2")
+                        drone.move(cw = 0.5)
+
 
             cv2.imshow('object detection', cv2.resize(image_np, (800,600)))
             if cv2.waitKey(25) & 0xFF == ord('q'):
+                while drone.state.fly_mask:
+                    drone.land()
                 cv2.destroyAllWindows()
                 break
