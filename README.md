@@ -1,4 +1,7 @@
 # Python3 - ArDrone
+## Demo
+([PyARdrone + Tensorflow object recognition](https://github.com/diegoballest/ardrone-tec))
+
 ## Ubuntu Installation guide:
 
 Be sure to have already installed Python’s package manager
